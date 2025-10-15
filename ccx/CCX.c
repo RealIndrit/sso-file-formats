@@ -47,8 +47,8 @@ CCXenum CCXReadFile(CCXContext *context) {
         dataEntry->file[dataEntry->fileNameLength] = '\0';
 
         fread(dataEntry->unknown1, sizeof(dataEntry->unknown1), 1, file);
-        fread(dataEntry->CRC1, sizeof(dataEntry->CRC1), 1, file);
-        fread(dataEntry->CRC2, sizeof(dataEntry->CRC2), 1, file);
+        fread(dataEntry->ORIGINAL_CRC, sizeof(dataEntry->ORIGINAL_CRC), 1, file);
+        fread(dataEntry->EXPORTED_CRC, sizeof(dataEntry->EXPORTED_CRC), 1, file);
         fread(&dataEntry->boolUnkown, sizeof(dataEntry->boolUnkown), 1, file);
         fread(dataEntry->spacer2, sizeof(dataEntry->spacer2), 1, file);
         fread(dataEntry->unknown2, sizeof(dataEntry->unknown2), 1, file);
@@ -67,11 +67,12 @@ CCXenum CCXReadFile(CCXContext *context) {
     return CCX_NONE;
 }
 
-CCXFileData** CCXGetFiles(CCXContext *context) {
-    return context->ccxFile->data;
+uint32_t CCXGetFiles(CCXContext *context, CCXFileData **results) {
+    *results = context->ccxFile->data;
+    return context->ccxFile->dataCount;
 }
 
-CCX_EXPORT uint32_t CCXFindFilesByName(CCXContext *context, const char *filePath, CCXFileData **results) {
+uint32_t CCXFindFilesByName(CCXContext *context, const char *filePath, CCXFileData **results) {
     CCXFileData *tempResults = NULL;
     uint32_t count = 0;
 

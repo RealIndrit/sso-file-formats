@@ -46,13 +46,13 @@ typedef uint8_t CCX_SPACER[3];
  *
  * This structure is used to store the header information for CCX files, which includes unknown data fields and the total length of the data.
  *
- * @var unknown Unknown data (5 bytes).
- * @var spacer1 Unknown data (3 bytes) used as padding or for unknown purposes.
+ * @var Magic bytes?.
+ * @var spacer1 Unknown data (4 bytes).
  * @var dataLength Total length of data (4 bytes).
  */
 typedef struct {
-    uint8_t unknown[5];    ///< Unknown data (5 bytes).
-    CCX_SPACER spacer1;    ///< Unknown data (3 bytes) used as padding or for unknown purposes.
+    uint8_t magicBytes[4]; ///< Magic bytes? (4 bytes).
+    uint8_t unkown1[4];    ///< Unknown data (4 bytes).
     uint32_t dataLength;   ///< Total length of data (4 bytes).
 } CCXFileHeader;
 
@@ -82,8 +82,8 @@ typedef struct {
     CCX_SPACER spacer1;        ///< Unknown data (3 bytes) used as padding or for unknown purposes.
     char *file;                ///< File name (variable length).
     uint8_t unknown1[8];       ///< Unknown data (8 bytes).
-    uint8_t CRC1[4];           ///< CRC1 checksum (4 bytes).
-    uint8_t CRC2[4];           ///< CRC2 checksum (4 bytes).
+    uint8_t ORIGINAL_CRC[4];   ///< CRC1 checksum (4 bytes).
+    uint8_t EXPORTED_CRC[4];   ///< CRC2 checksum (4 bytes).
     uint8_t boolUnkown;        ///< Unknown boolean data (1 byte).
     CCX_SPACER spacer2;        ///< Unknown data (3 bytes) used as padding or for unknown purposes.
     uint8_t unknown2[12];      ///< Unknown data (12 bytes).
@@ -165,9 +165,10 @@ CCX_EXPORT uint32_t CCXFindFilesByName(CCXContext *context, const char *filePath
  * This function returns an array of all file data entries present in the CCX file.
  *
  * @param context Pointer to the CCX context.
- * @return An array of pointers to all CCXFileData entries.
+ * @param an array of pointers to all CCXFileData entries.
+ * @return The number of entries of CCXFileData.
  */
-CCX_EXPORT CCXFileData** CCXGetFiles(CCXContext *context);
+CCX_EXPORT uint32_t CCXGetFiles(CCXContext *context, CCXFileData **result);
 
 /**
  * @brief Function to free the allocated memory in the CCX context.
