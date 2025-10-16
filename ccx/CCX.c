@@ -1,15 +1,15 @@
 #include <string.h>
 #include "CCX.h"
 
-CCXContext* CCXInitContext(const char *filePath) {
-    CCXContext *context = (CCXContext *)malloc(sizeof(CCXContext));
-    context->ccxFile = (CCXFile *)malloc(sizeof(CCXFile));
+CCX_Context* CCX_InitContext(const char *filePath) {
+    CCX_Context *context = (CCX_Context *)malloc(sizeof(CCX_Context));
+    context->ccxFile = (CCX_File *)malloc(sizeof(CCX_File));
     context->ccxFile->data = NULL;
     context->filePath = strdup(filePath);
     return context;
 }
 
-CCXenum CCXReadFile(CCXContext *context) {
+CCX_enum CCX_ReadFile(CCX_Context *context) {
     if (context == NULL || context->filePath == NULL) {
         return CCX_INVALID_CONTEXT;
     }
@@ -20,14 +20,14 @@ CCXenum CCXReadFile(CCXContext *context) {
     }
 
     // Read the header
-    if (fread(&context->ccxFile->header, sizeof(CCXFileHeader), 1, file) != 1) {
+    if (fread(&context->ccxFile->header, sizeof(CCX_FileHeader), 1, file) != 1) {
         fclose(file);
         return CCX_INVALID_CONTEXT;
     }
 
     // Allocate memory for the data array
     context->ccxFile->dataCount = context->ccxFile->header.dataLength;
-    context->ccxFile->data = (CCXFileData *)malloc(context->ccxFile->dataCount * sizeof(CCXFileData));
+    context->ccxFile->data = (CCX_FileData *)malloc(context->ccxFile->dataCount * sizeof(CCX_FileData));
     if (context->ccxFile->data == NULL) {
         fclose(file);
         return CCX_ALLOCATION_FAILURE;
@@ -35,7 +35,7 @@ CCXenum CCXReadFile(CCXContext *context) {
 
     // Read the file data
     for (uint32_t i = 0; i < context->ccxFile->dataCount; i++) {
-        CCXFileData *dataEntry = &context->ccxFile->data[i];
+        CCX_FileData *dataEntry = &context->ccxFile->data[i];
 
         // Read fixed-size fields
         fread(&dataEntry->fileNameLength, sizeof(dataEntry->fileNameLength), 1, file);
@@ -47,8 +47,8 @@ CCXenum CCXReadFile(CCXContext *context) {
         dataEntry->file[dataEntry->fileNameLength] = '\0';
 
         fread(dataEntry->unknown1, sizeof(dataEntry->unknown1), 1, file);
-        fread(dataEntry->ORIGINAL_CRC, sizeof(dataEntry->ORIGINAL_CRC), 1, file);
-        fread(dataEntry->EXPORTED_CRC, sizeof(dataEntry->EXPORTED_CRC), 1, file);
+        fread(dataEntry->ORIGINAL_CRC32, sizeof(dataEntry->ORIGINAL_CRC32), 1, file);
+        fread(dataEntry->EXPORTED_CRC32, sizeof(dataEntry->EXPORTED_CRC32), 1, file);
         fread(&dataEntry->boolUnkown, sizeof(dataEntry->boolUnkown), 1, file);
         fread(dataEntry->spacer2, sizeof(dataEntry->spacer2), 1, file);
         fread(dataEntry->unknown2, sizeof(dataEntry->unknown2), 1, file);
@@ -67,19 +67,19 @@ CCXenum CCXReadFile(CCXContext *context) {
     return CCX_NONE;
 }
 
-uint32_t CCXGetFiles(CCXContext *context, CCXFileData **results) {
+uint32_t CCX_GetFiles(CCX_Context *context, CCX_FileData **results) {
     *results = context->ccxFile->data;
     return context->ccxFile->dataCount;
 }
 
-uint32_t CCXFindFilesByName(CCXContext *context, const char *filePath, CCXFileData **results) {
-    CCXFileData *tempResults = NULL;
+uint32_t CCX_FindFilesByName(CCX_Context *context, const char *filePath, CCX_FileData **results) {
+    CCX_FileData *tempResults = NULL;
     uint32_t count = 0;
 
     for (uint64_t i = 0; i < context->ccxFile->dataCount; ++i) {
-        CCXFileData *data = &context->ccxFile->data[i];
+        CCX_FileData *data = &context->ccxFile->data[i];
         if (strstr(data->filePath, filePath) != NULL) {
-            CCXFileData *newResults = realloc(tempResults, (count + 1) * sizeof(CCXFileData));
+            CCX_FileData *newResults = realloc(tempResults, (count + 1) * sizeof(CCX_FileData));
             if (newResults == NULL) {
                 free(tempResults);
                 *results = NULL;
@@ -95,7 +95,7 @@ uint32_t CCXFindFilesByName(CCXContext *context, const char *filePath, CCXFileDa
 }
 
 
-CCXenum CCXFreeContext(CCXContext *context) {
+CCX_enum CCX_FreeContext(CCX_Context *context) {
     for (size_t i = 0; i < context->ccxFile->dataCount; ++i) {
         free(context->ccxFile->data[i].file);
         free(context->ccxFile->data[i].filePath);

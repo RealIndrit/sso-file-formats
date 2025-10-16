@@ -29,7 +29,7 @@ typedef enum {
     CCX_INVALID_CONTEXT    = 0x0001, ///< Invalid context error.
     CCX_ALLOCATION_FAILURE = 0x0002, ///< Allocation failure error.
     CCX_FREE_ALLOCATION_FAILURE = 0x0003 ///< Free allocation failure error.
-} CCXenum;
+} CCX_enum;
 
 /**
  * @typedef CCX_SPACER
@@ -54,7 +54,7 @@ typedef struct {
     uint8_t magicBytes[4]; ///< Magic bytes? (4 bytes).
     uint8_t unkown1[4];    ///< Unknown data (4 bytes).
     uint32_t dataLength;   ///< Total length of data (4 bytes).
-} CCXFileHeader;
+} CCX_FileHeader;
 
 /**
  * @struct CCXFileData
@@ -82,8 +82,8 @@ typedef struct {
     CCX_SPACER spacer1;        ///< Unknown data (3 bytes) used as padding or for unknown purposes.
     char *file;                ///< File name (variable length).
     uint8_t unknown1[8];       ///< Unknown data (8 bytes).
-    uint8_t ORIGINAL_CRC[4];   ///< CRC1 checksum (4 bytes).
-    uint8_t EXPORTED_CRC[4];   ///< CRC2 checksum (4 bytes).
+    uint8_t ORIGINAL_CRC32[4];   ///< CRC1 checksum (4 bytes).
+    uint8_t EXPORTED_CRC32[4];   ///< CRC2 checksum (4 bytes).
     uint8_t boolUnkown;        ///< Unknown boolean data (1 byte).
     CCX_SPACER spacer2;        ///< Unknown data (3 bytes) used as padding or for unknown purposes.
     uint8_t unknown2[12];      ///< Unknown data (12 bytes).
@@ -92,7 +92,7 @@ typedef struct {
     uint8_t filePathLength;    ///< Length of the file path (1 byte).
     CCX_SPACER spacer3;        ///< Unknown data (3 bytes) used as padding or for unknown purposes.
     char *filePath;            ///< File path (variable length).
-} CCXFileData;
+} CCX_FileData;
 
 #pragma pack(pop)
 
@@ -107,10 +107,10 @@ typedef struct {
  * @var dataCount Number of data entries.
  */
 typedef struct {
-    CCXFileHeader header;  ///< Header of the CCX file.
-    CCXFileData *data;     ///< Array of data entries.
+    CCX_FileHeader header;  ///< Header of the CCX file.
+    CCX_FileData *data;     ///< Array of data entries.
     uint32_t dataCount;    ///< Number of data entries.
-} CCXFile;
+} CCX_File;
 
 /**
  * @struct CCXContext
@@ -122,9 +122,9 @@ typedef struct {
  * @var filePath Path to the CCX file.
  */
 typedef struct {
-    CCXFile *ccxFile;   ///< Pointer to the CCX file structure.
+    CCX_File *ccxFile;   ///< Pointer to the CCX file structure.
     char *filePath;     ///< Path to the CCX file.
-} CCXContext;
+} CCX_Context;
 
 /**
  * @brief Function to initialize a CCX context with the given file path.
@@ -134,7 +134,7 @@ typedef struct {
  * @param filePath Path to the CCX file.
  * @return A pointer to the initialized CCX context.
  */
-CCX_EXPORT CCXContext* CCXInitContext(const char *filePath);
+CCX_EXPORT CCX_Context* CCX_InitContext(const char *filePath);
 
 /**
  * @brief Function to read and parse the CCX file into the context.
@@ -143,7 +143,7 @@ CCX_EXPORT CCXContext* CCXInitContext(const char *filePath);
  *
  * @param context Pointer to the CCX context.
  */
-CCX_EXPORT CCXenum CCXReadFile(CCXContext *context);
+CCX_EXPORT CCX_enum CCX_ReadFile(CCX_Context *context);
 
 /**
  * @brief Searches for files by name within a CCX context.
@@ -157,7 +157,7 @@ CCX_EXPORT CCXenum CCXReadFile(CCXContext *context);
  * @param result Array to store the matching CCXFileData entries.
  * @return The number of matching CCXFileData entries found.
  */
-CCX_EXPORT uint32_t CCXFindFilesByName(CCXContext *context, const char *filePath, CCXFileData **result);
+CCX_EXPORT uint32_t CCX_FindFilesByName(CCX_Context *context, const char *filePath, CCX_FileData **result);
 
 /**
  * @brief Function to return an array of all file data entries within the CCX file.
@@ -168,7 +168,7 @@ CCX_EXPORT uint32_t CCXFindFilesByName(CCXContext *context, const char *filePath
  * @param an array of pointers to all CCXFileData entries.
  * @return The number of entries of CCXFileData.
  */
-CCX_EXPORT uint32_t CCXGetFiles(CCXContext *context, CCXFileData **result);
+CCX_EXPORT uint32_t CCX_GetFiles(CCX_Context *context, CCX_FileData **result);
 
 /**
  * @brief Function to free the allocated memory in the CCX context.
@@ -177,6 +177,6 @@ CCX_EXPORT uint32_t CCXGetFiles(CCXContext *context, CCXFileData **result);
  *
  * @param context Pointer to the CCX context to be freed.
  */
-CCX_EXPORT CCXenum CCXFreeContext(CCXContext *context);
+CCX_EXPORT CCX_enum CCX_FreeContext(CCX_Context *context);
 
 #endif // CCX_H
